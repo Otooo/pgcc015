@@ -1,3 +1,6 @@
+# -*- Coding: UTF-8 -*-
+#coding: utf-8
+
 import time
 import math
 import statistics
@@ -6,8 +9,10 @@ from modules import Train
 from neurals import Perceptron
 from neurals import PerceptronMultiCamada
 from neurals import Adaline
-from sklearn.preprocessing import normalize
+from neurals import Kohonen
+import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import normalize
 
 
 def calc_accuracy(output, outputValid):
@@ -171,6 +176,64 @@ def startPerceptronMultiCamada(n, e, topology, momentum, typeAI):
   print('DESVIO PADRÃO ACURÁCIA: ', statistics.stdev(accuracyKFold))
 
 
+def startKohonen(n, r, topology, km=3):
+  train = Train()
+
+  kFold = 10
+  fileNameTrain = f'EPC04/iris-10-fold/iris-10-{(kFold)}tra.dat'
+  fileNameTest  = f'EPC04/iris-10-fold/iris-10-{(kFold)}tst.dat'
+
+  # Create net
+  kohonen = Kohonen(n, r, topology)
+
+  # Start execute time 
+  start = time.time()
+
+  # Set of training
+  inputTrain, outputTrain = train.read_train(fileNameTrain, ',')
+  # transformando em float as entradas
+  inputTrain = np.array(inputTrain).astype(float).tolist()
+
+  # Set of testing
+  inputTest, outputTest = train.read_test2(fileNameTest, ',')
+  # transformando em float as entradas
+  inputTest = np.array(inputTest).astype(float).tolist()
+  
+  # Train 
+  epoch, uMatrix, neurons = kohonen.kohonen_fit(inputTrain)
+
+  # Validation
+  output, clusters = kohonen.kohonen_predict(inputTest, km, outputTest)
+
+  # End execute time
+  end = time.time()
+  timeExecuted = end - start
+
+  #cmap='gray', # black => close
+  plt.imshow(uMatrix, cmap='gray', interpolation='lanczos')
+  plt.title(f'FOLD: {kFold}  Matriz {topology}x{topology}')
+  plt.show()
+
+  print(f'MATRIZ: {topology}x{topology}')
+  print(f'FOLD: {kFold}')
+  for ig in range(len(output)):
+    print(f'  > Grupo {ig+1}: \n    {output[ig]} \n')
+  print('ÉPOCAS: ', epoch)
+  print(f'TEMPO: {(timeExecuted + 0.5)//60} minuto(s)')
+  print('')
+  # print('SAÍDA: ', output)
+
+  plt_in   = plt.scatter(np.array(inputTest).T[0], np.array(inputTest).T[1], marker='^', c = 'green')
+  plt_cent = plt.scatter(clusters.T[0], clusters.T[1], marker='x', s = 70, c = 'red')
+  plt_n    = plt.scatter(np.array(neurons).T[0], np.array(neurons).T[1], marker='o', s = 60, c = 'blue')
+  plt.legend((plt_in, plt_cent, plt_n),
+           ('Entradas', 'Centroides', 'Neurônios'),
+           scatterpoints=1,
+           ncol=1,
+           fontsize=8)
+  # plt.grid() #função que desenha a grade no nosso gráfico
+  plt.show()
+
 
 #======================# GO GO GO #=====================#
 # Perceptron EPC01
@@ -188,12 +251,23 @@ def startPerceptronMultiCamada(n, e, topology, momentum, typeAI):
 
 
 # Perceptron Multicamada EPC03
-print('PERCEPTRON MULTICAMADA: ')
-print('Iris:')
-startPerceptronMultiCamada(0.1, 10**(-6), [4,2,3], 0, 'flower') # learning & precision & momentum & topology & momentum & type
-# --------------------------------------------------------------------------------------------------------------------------------
-print('')
-print('Wine')
-startPerceptronMultiCamada(0.1, 10**(-6), [4,4,4], 0, 'wine') # learning & precision & momentum & topology & momentum & type
-print('FIM PERCEPTRON MULTICAMADA')
+# print('PERCEPTRON MULTICAMADA: ')
+# print('Iris:')
+# startPerceptronMultiCamada(0.1, 10**(-6), [4,2,3], 0, 'flower') # learning & precision & momentum & topology & momentum & type
+# # --------------------------------------------------------------------------------------------------------------------------------
+# print('')
+# print('Wine')
+# startPerceptronMultiCamada(0.1, 10**(-6), [4,4,4], 0, 'wine') # learning & precision & momentum & topology & momentum & type
+# print('FIM PERCEPTRON MULTICAMADA')
+# print()
+
+
+# Kohonen EPC04
+print('KOHONEN: ')
+startKohonen(0.001, 1, 5) # learning & radius & topology
+# startKohonen(0.001, 1, 5) # learning & radius & topology
+# startKohonen(0.001, 1, 40) # learning & radius & topology
+# startKohonen(0.001, 1, 50) # learning & radius & topology
+# startKohonen(0.001, 1, 100) # learning & radius & topology
+print('FIM KOHONEN')
 print()
