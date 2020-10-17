@@ -12,7 +12,7 @@ from neurals import Adaline
 from neurals import Kohonen
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import normalize
+from mlxtend.preprocessing import minmax_scaling
 
 
 def calc_accuracy(output, outputValid):
@@ -121,14 +121,14 @@ def startPerceptronMultiCamada(n, e, topology, momentum, typeAI):
       # Set of training
       inputTrain, outputTrain = train.read_train(fileNameTrain, ',')
       #normalizando entradas
-      inputTrain = normalize(inputTrain).tolist()
+      inputTrain = minmax_scaling(np.array(inputTrain), columns=[i for i in range(len(inputTrain[0][0]))]).tolist()
 
       # Set of testing
       inputValidate, outputValidate = train.read_test2(fileNameTest, ',')
       # Set of validation
       # inputValidate, outputValidate = train.read_test2(fileNameValidation, ',')
       #normalizando
-      inputValidate = normalize(inputValidate).tolist()
+      inputValidate = minmax_scaling(np.array(inputValidate), columns=[i for i in range(len(inputValidate[0][0]))]).tolist()
       
       # Train 
       epoch, eqm = perceptronMC.perceptro_m_c_fit(inputTrain, outputTrain)
@@ -179,7 +179,7 @@ def startPerceptronMultiCamada(n, e, topology, momentum, typeAI):
 def startKohonen(n, r, topology, km=3):
   train = Train()
 
-  kFold = 10
+  kFold = 7
   fileNameTrain = f'EPC04/iris-10-fold/iris-10-{(kFold)}tra.dat'
   fileNameTest  = f'EPC04/iris-10-fold/iris-10-{(kFold)}tst.dat'
 
@@ -191,13 +191,13 @@ def startKohonen(n, r, topology, km=3):
 
   # Set of training
   inputTrain, outputTrain = train.read_train(fileNameTrain, ',')
-  # transformando em float as entradas
-  inputTrain = np.array(inputTrain).astype(float).tolist()
+  # normalizando entradas
+  inputTrain = minmax_scaling(np.array(inputTrain), columns=[i for i in range(len(inputTrain[0][0]))]).tolist()
 
   # Set of testing
   inputTest, outputTest = train.read_test2(fileNameTest, ',')
-  # transformando em float as entradas
-  inputTest = np.array(inputTest).astype(float).tolist()
+  # normalizando entradas
+  inputTest = minmax_scaling(np.array(inputTest), columns=[i for i in range(len(inputTest[0][0]))]).tolist()
   
   # Train 
   epoch, uMatrix, neurons = kohonen.kohonen_fit(inputTrain)
@@ -220,8 +220,6 @@ def startKohonen(n, r, topology, km=3):
     print(f'  > Grupo {ig+1}: \n    {output[ig]} \n')
   print('ÉPOCAS: ', epoch)
   print(f'TEMPO: {(timeExecuted + 0.5)//60} minuto(s)')
-  print('')
-  # print('SAÍDA: ', output)
 
   plt_in   = plt.scatter(np.array(inputTest).T[0], np.array(inputTest).T[1], marker='^', c = 'green')
   plt_cent = plt.scatter(clusters.T[0], clusters.T[1], marker='x', s = 70, c = 'red')
@@ -231,7 +229,7 @@ def startKohonen(n, r, topology, km=3):
            scatterpoints=1,
            ncol=1,
            fontsize=8)
-  # plt.grid() #função que desenha a grade no nosso gráfico
+  # plt.grid() #função que desenha a grade no gráfico
   plt.show()
 
 
@@ -265,9 +263,5 @@ def startKohonen(n, r, topology, km=3):
 # Kohonen EPC04
 print('KOHONEN: ')
 startKohonen(0.001, 1, 5) # learning & radius & topology
-# startKohonen(0.001, 1, 5) # learning & radius & topology
-# startKohonen(0.001, 1, 40) # learning & radius & topology
-# startKohonen(0.001, 1, 50) # learning & radius & topology
-# startKohonen(0.001, 1, 100) # learning & radius & topology
 print('FIM KOHONEN')
 print()

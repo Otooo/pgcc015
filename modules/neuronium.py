@@ -11,11 +11,11 @@ class Neuronium:
     self.output = None # I => output no activation
 
   def __repr__(self): 
-    # return " <-> ".join([str(elem) for elem in self.w])
+    return " <-> ".join([str(elem) for elem in self.w])
     # return " <-> ".join(str(self.output))
-    return "N"
+    # return "N"
 
   def __str__(self):
-    # return " <-> ".join([str(elem) for elem in self.w])
+    return " <-> ".join([str(elem) for elem in self.w])
     # return " <-> ".join(str(self.output))
-    return "N"
+    # return "N"

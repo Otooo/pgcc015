@@ -1,5 +1,3 @@
-import threading
-import logging
 import math
 import numpy as np
 from modules import Neuronium
@@ -130,7 +128,7 @@ class Kohonen:
     m = len(self.topology)
     matrixNeurons = np.zeros((m, m, lenW))
 
-    while True: #and epoch < 2*self.maxEpoch:
+    while True and epoch < m*self.maxEpoch:
       matrixNeurons_old = copy(matrixNeurons)
 
       for ix in range(len(x)):
@@ -183,5 +181,5 @@ class Kohonen:
       for c in range(len(self.topology[0])):
         ws.append(self.topology[r][c].w)
 
-    kmeans = KMeans(n_clusters=k, init='random').fit(ws)
+    kmeans = KMeans(n_clusters=k, init='k-means++').fit(ws)
     return kmeans.cluster_centers_
