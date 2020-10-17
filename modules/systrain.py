@@ -1,7 +1,5 @@
 import csv
 import random
-import threading
-import logging
 
 
 class Train:
