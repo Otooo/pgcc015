@@ -1,5 +1,3 @@
-import threading
-import logging
 from modules import Neuronium
 from modules import Layer
 
