@@ -1,7 +1,6 @@
 import math
 import numpy as np
 from modules import Neuronium
-from modules import Layer
 from copy import copy, deepcopy
 from sklearn.cluster import KMeans
 
