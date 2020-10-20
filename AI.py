@@ -10,6 +10,7 @@ from neurals import Perceptron
 from neurals import PerceptronMultiCamada
 from neurals import Adaline
 from neurals import Kohonen
+from neurals import Fuzzy
 import numpy as np
 import matplotlib.pyplot as plt
 from mlxtend.preprocessing import minmax_scaling
@@ -233,35 +234,18 @@ def startKohonen(n, r, topology, km=3):
   plt.show()
 
 
+def startFuzzy():
+  train = Train()
+
+  fuzzy = Fuzzy()
+  
+  print('iniciei o fuzzy')
+
+
+
 #======================# GO GO GO #=====================#
-# Perceptron EPC01
-# print('PERCEPTRON: ')
-# startPerceptron(0.01) # learning
-# print('FIM PERCEPTRON')
-# print()
-
-
-# Adaline EPC02
-# print('ADALINE: ')
-# startAdaline(0.0025, 10**(-6)) # learning & precision
-# print('FIM ADALINE')
-# print()
-
-
-# Perceptron Multicamada EPC03
-# print('PERCEPTRON MULTICAMADA: ')
-# print('Iris:')
-# startPerceptronMultiCamada(0.1, 10**(-6), [4,2,3], 0, 'flower') # learning & precision & momentum & topology & momentum & type
-# # --------------------------------------------------------------------------------------------------------------------------------
-# print('')
-# print('Wine')
-# startPerceptronMultiCamada(0.1, 10**(-6), [4,4,4], 0, 'wine') # learning & precision & momentum & topology & momentum & type
-# print('FIM PERCEPTRON MULTICAMADA')
-# print()
-
-
-# Kohonen EPC04
-print('KOHONEN: ')
-startKohonen(0.001, 1, 5) # learning & radius & topology
-print('FIM KOHONEN')
+# Fuzzy EPC05
+print('FUZZY: ')
+startFuzzy()
+print('FIM FUZZY')
 print()
