@@ -15,6 +15,8 @@ def startFuzzy():
   ruleT = [[800, 900, 1000], [900, 1000, 1100], [1000, 1100, 1200]]
   ruleV = [[2.0, 4.5, 7.0],  [4.5, 7.0, 9.5],   [7.0, 9.5, 12.0]]
   ruleP = [[4, 5, 8],        [6, 8, 10],        [8, 11, 12]]
+
+  # The last must be the result goal (Pressure)
   rules = {"Temperature":ruleT, "Volume":ruleV, "Pressure":ruleP}
 
   fuzzy = Fuzzy(rules)
