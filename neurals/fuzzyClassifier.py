@@ -2,7 +2,12 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 import numpy as np
 
-class Fuzzy:
+class FuzzyClassifier:
+
+  @staticmethod
+  def generate_rules(cls):
+    return "Se a alto e b baixo m médio"
+    
 
   def __init__(self, relevance): 
     self.relevance = {}
