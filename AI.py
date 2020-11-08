@@ -22,72 +22,104 @@ def calc_accuracy(output, outputValid):
   return (total / len(outputValid)) * 100
 
 
-def startFuzzyClassifier(step=1, withoutWeights):
+def startFuzzyClassifier():
   train = Train()
 
-  eqmKFold = []
-  accuracyKFold = []
-  epochKFold = []
-  timeKFold = []
+  accuracyKFold = {
+      'mrfc_wtp': [],
+      'mrfg_wtp': [],
+      'mrfc_wp':  [],
+      'mrfg_wp':  []
+  }
+  foldRules = {}
+  foldRulesWithPeso = {}
 
-  kFold = 1
+  kFold = 10
   for i in range(kFold):
     fileNameTrain = f'EPC06/iris-10-fold/iris-10-{(i+1)}tra.dat'
     fileNameTest  = f'EPC06/iris-10-fold/iris-10-{(i+1)}tst.dat'
 
     # Set of training
     inputTrain, outputTrain = train.read_train(fileNameTrain, ',')
-    #normalizando entradas
-    inputTrain = minmax_scaling(np.array(inputTrain), columns=[i for i in range(len(inputTrain[0][0]))]).tolist()
-
+    
     # Set of testing
     inputTest, outputTest = train.read_test2(fileNameTest, ',')
-    #normalizando
-    inputTest = minmax_scaling(np.array(inputTest), columns=[i for i in range(len(inputTest[0][0]))]).tolist()
 
-    ruleT = [[800, 900, 1000], [900, 1000, 1100], [1000, 1100, 1200]]
-    ruleV = [[2.0, 4.5, 7.0],  [4.5, 7.0, 9.5],   [7.0, 9.5, 12.0]]
-    ruleP = [[4, 5, 8],        [6, 8, 10],        [8, 11, 12]]
+    # Without pesos
+    rules = FuzzyClassifier.wang_mendel(inputTrain, outputTrain)
+    foldRules[i+1] = rules
+    print(f'Fold {i+1} com {len(rules)} Regras')
+    # ...
+    fuzzy = None
+    fuzzy = FuzzyClassifier(rules)
+    output_mrfc = fuzzy.classifier_MRFC(inputTest)
+    output_mrfg = fuzzy.classifier_MRFG(inputTest)
 
-    # The last must be the result goal (Pressure)
-    rules = {"Temperature":ruleT, "Volume":ruleV, "Pressure":ruleP}
+    # With pesos
+    pesosCF = FuzzyClassifier.calc_peso(inputTrain, outputTrain)
+    mp = statistics.mean(pesosCF)
+    print(f'Média dos pesos: {mp}')
+    rules = FuzzyClassifier.wang_mendel(inputTrain, outputTrain, pesosCF)
+    foldRulesWithPeso[i+1] = rules
+    print(f'Fold {i+1} com {len(rules)} Regras Utilizando Pesos')
+    # ...
+    fuzzy = None
+    fuzzy = FuzzyClassifier(rules)
+    output_mrfcwp = fuzzy.classifier_MRFC(inputTest)
+    output_mrfgwp = fuzzy.classifier_MRFG(inputTest)
+    
 
-    fuzzy = Fuzzy(rules)
-    # fuzzy.relevances()
+    # Analysis
+    accMrfc = calc_accuracy(output_mrfc, outputTest)
+    accMrfg = calc_accuracy(output_mrfg, outputTest)
+    accMrfcwp = calc_accuracy(output_mrfcwp, outputTest)
+    accMrfgwp = calc_accuracy(output_mrfgwp, outputTest)
+    accuracyKFold['mrfc_wtp'].append(accMrfc)
+    accuracyKFold['mrfg_wtp'].append(accMrfg)
+    accuracyKFold['mrfc_wp'].append(accMrfcwp)
+    accuracyKFold['mrfg_wp'].append(accMrfgwp)
 
-    fuzzy.set_rules()
+    print(f'Acurácia MRFC Fold {i+1}: {accMrfc}')
+    print(f'Acurácia MRFC Fold com Peso {i+1}: {accMrfcwp}')
+    print(f'Acurácia MRFG Fold {i+1}: {accMrfg}')
+    print(f'Acurácia MRFG Fold com Peso {i+1}: {accMrfgwp}')
+    print('')
 
-    #a)
-    outputNumber, simu = fuzzy.control(965, 11)
-    print(f'SAÍDA a): {outputNumber} atm')
-    fuzzy.relevances(simu)
+  print('')
+  # for i in range(len(foldRulesWithPeso[1])):
+  #   print(foldRulesWith[1][i]['condition']) # Fold 1
+  #   print(foldRulesWithPeso[1][i]['condition']) # Fold 1
+  # print('')
 
-    #b)
-    outputNumber, simu = fuzzy.control(920, 7.6)
-    print(f'SAÍDA b): {outputNumber} atm')
-    fuzzy.relevances(simu)
+  mfc = statistics.mean(accuracyKFold['mrfc_wtp'])
+  dpfc = statistics.stdev(accuracyKFold['mrfc_wtp'])
 
-    #c)
-    outputNumber, simu = fuzzy.control(1050, 6.3)
-    print(f'SAÍDA c): {outputNumber} atm')
-    fuzzy.relevances(simu)
+  mfg = statistics.mean(accuracyKFold['mrfg_wtp'])
+  dpfg = statistics.stdev(accuracyKFold['mrfg_wtp'])
 
-    #d)
-    outputNumber, simu = fuzzy.control(843, 8.6)
-    print(f'SAÍDA d): {outputNumber} atm')
-    fuzzy.relevances(simu)
+  mfcwp = statistics.mean(accuracyKFold['mrfc_wp'])
+  dpfcwp = statistics.stdev(accuracyKFold['mrfc_wp'])
+  
+  mfgwp = statistics.mean(accuracyKFold['mrfg_wp'])
+  dpfgwp = statistics.stdev(accuracyKFold['mrfg_wp'])
 
-    #e)
-    outputNumber, simu = fuzzy.control(1122, 5.2)
-    print(f'SAÍDA e): {outputNumber} atm')
-    fuzzy.relevances(simu)
+  print(f'Média MRFC: {mfc}')
+  print(f'Desvio Padrão MRFC: {dpfc}')  
+  print('')
+  print(f'Média MRFC com Peso: {mfcwp}')
+  print(f'Desvio Padrão MRFC com Peso: {dpfcwp}')  
+  print('')
+  print(f'Média MRFG: {mfg}')
+  print(f'Desvio Padrão MRFG: {dpfg}')  
+  print('')
+  print(f'Média MRFG com Peso: {mfgwp}')
+  print(f'Desvio Padrão MRFG com Peso: {dpfgwp}')  
 
 
 #======================# GO GO GO #=====================#
 
 # Fuzzy EPC06
 print('FUZZY: ')
-startFuzzyClassifier(step=1) # passos para o epc
+startFuzzyClassifier()
 print('FIM FUZZY')
 print()
-
